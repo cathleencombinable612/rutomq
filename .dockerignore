@@ -1,0 +1,8 @@
+.git
+.codex
+target
+tests/**/runtime
+tests/**/target
+deploy/compose.dev.yml
+*.swp
+.DS_Store

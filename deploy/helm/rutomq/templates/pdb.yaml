@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "rutomq.fullname" . }}
+  labels:
+    {{- include "rutomq.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rutomq.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}

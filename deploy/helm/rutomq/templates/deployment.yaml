@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rutomq.fullname" . }}
+  labels:
+    {{- include "rutomq.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rutomq.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "rutomq.labels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ .Values.pod.terminationGracePeriodSeconds }}
+      containers:
+        - name: rutomq
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["agent"]
+          ports:
+            - name: kafka
+              containerPort: 9092
+            - name: admin
+              containerPort: 8080
+          {{- if .Values.security.tls.enabled }}
+          volumeMounts:
+            - name: kafka-tls
+              mountPath: /etc/rutomq/tls
+              readOnly: true
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "rutomq.fullname" . }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.existingSecret }}
+                  key: {{ .Values.postgres.urlKey }}
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.objectStore.existingSecret }}
+                  key: {{ .Values.objectStore.accessKeyKey }}
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.objectStore.existingSecret }}
+                  key: {{ .Values.objectStore.secretKeyKey }}
+            {{- if .Values.security.tls.enabled }}
+            - name: KAFKA_TLS_CERT_FILE
+              value: /etc/rutomq/tls/tls.crt
+            - name: KAFKA_TLS_KEY_FILE
+              value: /etc/rutomq/tls/tls.key
+            {{- end }}
+            {{- if .Values.security.scram.existingSecret }}
+            - name: RUTOMQ_SCRAM_USERS_JSON
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.security.scram.existingSecret }}
+                  key: {{ .Values.security.scram.usersJsonKey }}
+            {{- end }}
+            {{- if .Values.security.delegationTokens.existingSecret }}
+            - name: RUTOMQ_DELEGATION_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.security.delegationTokens.existingSecret }}
+                  key: {{ .Values.security.delegationTokens.secretKey }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: admin
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: admin
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.security.tls.enabled }}
+      volumes:
+        - name: kafka-tls
+          secret:
+            secretName: {{ .Values.security.tls.existingSecret }}
+            items:
+              - key: {{ .Values.security.tls.certificateKey }}
+                path: tls.crt
+              - key: {{ .Values.security.tls.privateKeyKey }}
+                path: tls.key
+      {{- end }}

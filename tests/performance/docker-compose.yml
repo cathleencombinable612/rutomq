@@ -1,0 +1,82 @@
+x-agent: &agent
+  image: rutomq:performance-it
+  command: agent
+  cpus: "${RUTOMQ_PERF_AGENT_CPUS:-1.0}"
+  mem_limit: "${RUTOMQ_PERF_AGENT_MEMORY:-512m}"
+  depends_on:
+    postgres:
+      condition: service_healthy
+    minio-init:
+      condition: service_completed_successfully
+  environment:
+    DATABASE_URL: postgres://rutomq:rutomq@postgres:5432/rutomq
+    OBJECT_STORE_BACKEND: s3
+    S3_ENDPOINT: http://minio:9000
+    S3_BUCKET: rutomq
+    S3_ROOT: rutomq
+    S3_REGION: us-east-1
+    S3_ACCESS_KEY_ID: minioadmin
+    S3_SECRET_ACCESS_KEY: minioadmin
+    KAFKA_ADVERTISE_HOST: gateway
+    KAFKA_ADVERTISE_PORT: 9092
+    RUTOMQ_FLUSH_INTERVAL_MS: "${RUTOMQ_PERF_FLUSH_INTERVAL_MS:-250}"
+    RUTOMQ_MAX_BATCH_BYTES: "${RUTOMQ_PERF_MAX_BATCH_BYTES:-8388608}"
+    RUTOMQ_FETCH_CACHE_BYTES: "${RUTOMQ_PERF_FETCH_CACHE_BYTES:-268435456}"
+    RUTOMQ_RETENTION_INTERVAL_MS: 600000
+    RUTOMQ_COMPACTION_INTERVAL_MS: 600000
+    RUST_LOG: rutomq=warn
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: rutomq
+      POSTGRES_PASSWORD: rutomq
+      POSTGRES_DB: rutomq
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rutomq -d rutomq"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        until mc alias set local http://minio:9000 minioadmin minioadmin;
+        do sleep 1; done;
+        mc mb --ignore-existing local/rutomq
+
+  agent1:
+    <<: *agent
+    ports:
+      - "${RUTOMQ_PERF_ADMIN1_PORT:-38091}:8080"
+
+  agent2:
+    <<: *agent
+    ports:
+      - "${RUTOMQ_PERF_ADMIN2_PORT:-38092}:8080"
+
+  agent3:
+    <<: *agent
+    ports:
+      - "${RUTOMQ_PERF_ADMIN3_PORT:-38093}:8080"
+
+  gateway:
+    image: haproxy:3.2-alpine
+    depends_on:
+      - agent1
+    ports:
+      - "${RUTOMQ_PERF_KAFKA_PORT:-39093}:9092"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro

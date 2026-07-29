@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rutomq.fullname" . }}
+  labels:
+    {{- include "rutomq.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ include "rutomq.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: kafka
+      port: {{ .Values.service.kafkaPort }}
+      targetPort: kafka
+    - name: admin
+      port: {{ .Values.service.adminPort }}
+      targetPort: admin

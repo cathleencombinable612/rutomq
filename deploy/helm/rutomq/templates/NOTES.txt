@@ -1,0 +1,7 @@
+rutomq is available at:
+
+  {{ include "rutomq.fullname" . }}:{{ .Values.service.kafkaPort }}
+
+Health:
+
+  http://{{ include "rutomq.fullname" . }}:{{ .Values.service.adminPort }}/health/ready

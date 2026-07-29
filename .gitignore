@@ -1,0 +1,8 @@
+target/
+.env
+*.log
+.DS_Store
+tests/flink/runtime/
+tests/security/runtime/
+.workflow/
+vendor/kafka-protocol/src/messages/* [0-9]*.rs

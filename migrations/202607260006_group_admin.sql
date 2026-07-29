@@ -1,0 +1,3 @@
+ALTER TABLE consumer_group_members
+    ADD COLUMN IF NOT EXISTS client_id TEXT NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS client_host TEXT NOT NULL DEFAULT '';

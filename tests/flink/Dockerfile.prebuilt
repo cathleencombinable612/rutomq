@@ -1,0 +1,7 @@
+FROM rust:1.88-bookworm AS certificates
+
+FROM debian:bookworm-slim
+COPY --from=certificates /etc/ssl/certs /etc/ssl/certs
+COPY rutomq /usr/local/bin/rutomq
+EXPOSE 9092 8080
+ENTRYPOINT ["/usr/local/bin/rutomq"]

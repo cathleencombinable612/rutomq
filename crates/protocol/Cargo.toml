@@ -1,0 +1,12 @@
+[package]
+name = "rutomq-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+bytes.workspace = true
+kafka-protocol.workspace = true
+thiserror.workspace = true

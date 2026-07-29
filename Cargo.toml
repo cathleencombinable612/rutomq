@@ -1,0 +1,53 @@
+[workspace]
+members = [
+    "crates/protocol",
+    "crates/storage",
+    "crates/control",
+    "crates/agent",
+    "bin/rutomq",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+rust-version = "1.88"
+
+[workspace.dependencies]
+anyhow = "1"
+async-trait = "0.1"
+axum = "0.8"
+base64 = "0.22"
+bytes = "1"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4", features = ["derive", "env"] }
+futures-util = "0.3"
+flate2 = "1"
+hex = "0.4"
+hmac = "0.12"
+indexmap = "2"
+kafka-protocol = { path = "vendor/kafka-protocol" }
+lz4 = "1"
+opendal = { version = "0.57", features = ["services-s3", "services-memory"] }
+pbkdf2 = "0.12"
+prometheus = "0.13"
+rand = "0.9"
+regex = "1"
+rustls-pemfile = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "migrate", "macros", "json"] }
+subtle = "2"
+thiserror = "2"
+tokio = { version = "1", features = ["full"] }
+tokio-rustls = "0.26"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+zstd = "0.13"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

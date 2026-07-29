@@ -1,0 +1,136 @@
+replicaCount: 3
+
+image:
+  repository: rutomq
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  kafkaPort: 9092
+  adminPort: 8080
+
+postgres:
+  existingSecret: rutomq-postgres
+  urlKey: database-url
+
+objectStore:
+  backend: s3
+  endpoint: ""
+  bucket: rutomq
+  root: rutomq
+  region: us-east-1
+  existingSecret: rutomq-object-store
+  accessKeyKey: access-key-id
+  secretKeyKey: secret-access-key
+  writeChunkBytes: 8388608
+  writeConcurrency: 4
+
+cluster:
+  id: rutomq-cluster
+  advertiseHost: ""
+  advertisePort: 9092
+  numPartitions: 1
+  defaultReplicationFactor: 1
+  autoCreateTopicsEnable: true
+
+agent:
+  flushIntervalMs: 250
+  maxBatchBytes: 8388608
+  maxRequestPartitionSizeLimit: 2000
+  fetchCacheBytes: 268435456
+  observabilityIntervalMs: 15000
+  observabilityMaxGroups: 1000
+  consumerLagMaxSeries: 10000
+  partitionRetentionMaxSeries: 10000
+  shutdownGraceMs: 25000
+  orphanGcIntervalMs: 60000
+  orphanGcGraceMs: 300000
+  retentionIntervalMs: 60000
+  objectDeleteGraceMs: 300000
+  compactionIntervalMs: 60000
+  compactionLeaseMs: 300000
+  compactionMaxObjectBytes: 67108864
+  producerIdExpirationMs: 86400000
+  producerIdExpirationCheckIntervalMs: 600000
+  offsetMetadataMaxBytes: 4096
+  offsetsRetentionMinutes: 10080
+  offsetsRetentionCheckIntervalMs: 600000
+  transactionalIdExpirationMs: 604800000
+  transactionalIdExpirationCheckIntervalMs: 3600000
+  transactionAbortTimedOutCleanupIntervalMs: 10000
+  transactionPartitionVerificationEnable: true
+  transactionMaxTimeoutMs: 900000
+  transactionTwoPhaseCommitEnable: false
+  classicGroupMinSessionTimeoutMs: 6000
+  classicGroupMaxSessionTimeoutMs: 1800000
+  classicGroupMaxSize: 2147483647
+  groupCoordinatorBackgroundThreads: 2
+  groupCoordinatorCachedBufferMaxBytes: 1048588
+  shareCoordinatorCachedBufferMaxBytes: 1048588
+  groupConsumerAssignorOffloadEnable: true
+  groupShareAssignorOffloadEnable: true
+  groupStreamsAssignorOffloadEnable: true
+  groupConsumerHeartbeatIntervalMs: 5000
+  groupConsumerMinHeartbeatIntervalMs: 5000
+  groupConsumerMaxHeartbeatIntervalMs: 15000
+  groupConsumerSessionTimeoutMs: 45000
+  groupConsumerMinSessionTimeoutMs: 45000
+  groupConsumerMaxSessionTimeoutMs: 60000
+  groupConsumerMaxSize: 2147483647
+  groupConsumerAssignors:
+    - uniform
+    - range
+  groupConsumerRegexRefreshIntervalMs: 600000
+  groupShareAssignors:
+    - simple
+  streamsGroupHeartbeatIntervalMs: 5000
+  streamsGroupMinHeartbeatIntervalMs: 5000
+  streamsGroupMaxHeartbeatIntervalMs: 15000
+  streamsGroupSessionTimeoutMs: 45000
+  streamsGroupMinSessionTimeoutMs: 45000
+  streamsGroupMaxSessionTimeoutMs: 60000
+  streamsGroupMaxSize: 2147483647
+  streamsGroupInitialRebalanceDelayMs: 3000
+  streamsGroupNumStandbyReplicas: 0
+  streamsGroupMaxStandbyReplicas: 2
+  shareGroupHeartbeatIntervalMs: 5000
+  shareGroupMinHeartbeatIntervalMs: 5000
+  shareGroupMaxHeartbeatIntervalMs: 15000
+  shareGroupSessionTimeoutMs: 45000
+  shareGroupMinSessionTimeoutMs: 45000
+  shareGroupMaxSessionTimeoutMs: 60000
+  shareGroupMaxSize: 200
+  shareRecordLockDurationMs: 30000
+  shareMinRecordLockDurationMs: 15000
+  shareMaxRecordLockDurationMs: 60000
+
+pod:
+  terminationGracePeriodSeconds: 35
+
+security:
+  tls:
+    enabled: false
+    existingSecret: rutomq-tls
+    certificateKey: tls.crt
+    privateKeyKey: tls.key
+  scram:
+    enabled: false
+    existingSecret: ""
+    usersJsonKey: scram-users.json
+    iterations: 4096
+    maxReauthMs: 0
+  delegationTokens:
+    existingSecret: ""
+    secretKey: delegation-token-secret
+    maxLifetimeMs: 604800000
+    expiryMs: 86400000
+  authorization:
+    enabled: false
+    allowEveryoneIfNoAclFound: false
+    superUsers: []
+
+resources: {}
+
+podDisruptionBudget:
+  minAvailable: 1

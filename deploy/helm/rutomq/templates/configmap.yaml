@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rutomq.fullname" . }}
+  labels:
+    {{- include "rutomq.labels" . | nindent 4 }}
+data:
+  RUTOMQ_CLUSTER_ID: {{ .Values.cluster.id | quote }}
+  OBJECT_STORE_BACKEND: {{ .Values.objectStore.backend | quote }}
+  S3_ENDPOINT: {{ .Values.objectStore.endpoint | quote }}
+  S3_BUCKET: {{ .Values.objectStore.bucket | quote }}
+  S3_ROOT: {{ .Values.objectStore.root | quote }}
+  S3_REGION: {{ .Values.objectStore.region | quote }}
+  RUTOMQ_OBJECT_WRITE_CHUNK_BYTES: {{ .Values.objectStore.writeChunkBytes | int64 | quote }}
+  RUTOMQ_OBJECT_WRITE_CONCURRENCY: {{ .Values.objectStore.writeConcurrency | quote }}
+  KAFKA_ADVERTISE_HOST: {{ default (include "rutomq.fullname" .) .Values.cluster.advertiseHost | quote }}
+  KAFKA_ADVERTISE_PORT: {{ .Values.cluster.advertisePort | quote }}
+  RUTOMQ_NUM_PARTITIONS: {{ .Values.cluster.numPartitions | quote }}
+  RUTOMQ_DEFAULT_REPLICATION_FACTOR: {{ .Values.cluster.defaultReplicationFactor | quote }}
+  RUTOMQ_AUTO_CREATE_TOPICS_ENABLE: {{ .Values.cluster.autoCreateTopicsEnable | quote }}
+  RUTOMQ_FLUSH_INTERVAL_MS: {{ .Values.agent.flushIntervalMs | quote }}
+  RUTOMQ_MAX_BATCH_BYTES: {{ .Values.agent.maxBatchBytes | int64 | quote }}
+  RUTOMQ_MAX_REQUEST_PARTITION_SIZE_LIMIT: {{ .Values.agent.maxRequestPartitionSizeLimit | quote }}
+  RUTOMQ_FETCH_CACHE_BYTES: {{ .Values.agent.fetchCacheBytes | int64 | quote }}
+  RUTOMQ_OBSERVABILITY_INTERVAL_MS: {{ .Values.agent.observabilityIntervalMs | quote }}
+  RUTOMQ_OBSERVABILITY_MAX_GROUPS: {{ .Values.agent.observabilityMaxGroups | quote }}
+  RUTOMQ_CONSUMER_LAG_MAX_SERIES: {{ .Values.agent.consumerLagMaxSeries | quote }}
+  RUTOMQ_PARTITION_RETENTION_MAX_SERIES: {{ .Values.agent.partitionRetentionMaxSeries | quote }}
+  RUTOMQ_SHUTDOWN_GRACE_MS: {{ .Values.agent.shutdownGraceMs | quote }}
+  RUTOMQ_ORPHAN_GC_INTERVAL_MS: {{ .Values.agent.orphanGcIntervalMs | quote }}
+  RUTOMQ_ORPHAN_GC_GRACE_MS: {{ .Values.agent.orphanGcGraceMs | quote }}
+  RUTOMQ_RETENTION_INTERVAL_MS: {{ .Values.agent.retentionIntervalMs | quote }}
+  RUTOMQ_OBJECT_DELETE_GRACE_MS: {{ .Values.agent.objectDeleteGraceMs | quote }}
+  RUTOMQ_COMPACTION_INTERVAL_MS: {{ .Values.agent.compactionIntervalMs | quote }}
+  RUTOMQ_COMPACTION_LEASE_MS: {{ .Values.agent.compactionLeaseMs | quote }}
+  RUTOMQ_COMPACTION_MAX_OBJECT_BYTES: {{ .Values.agent.compactionMaxObjectBytes | int64 | quote }}
+  RUTOMQ_PRODUCER_ID_EXPIRATION_MS: {{ .Values.agent.producerIdExpirationMs | int64 | quote }}
+  RUTOMQ_PRODUCER_ID_EXPIRATION_CHECK_INTERVAL_MS: {{ .Values.agent.producerIdExpirationCheckIntervalMs | int64 | quote }}
+  RUTOMQ_OFFSET_METADATA_MAX_BYTES: {{ .Values.agent.offsetMetadataMaxBytes | int64 | quote }}
+  RUTOMQ_OFFSETS_RETENTION_MINUTES: {{ .Values.agent.offsetsRetentionMinutes | quote }}
+  RUTOMQ_OFFSETS_RETENTION_CHECK_INTERVAL_MS: {{ .Values.agent.offsetsRetentionCheckIntervalMs | int64 | quote }}
+  RUTOMQ_TRANSACTIONAL_ID_EXPIRATION_MS: {{ .Values.agent.transactionalIdExpirationMs | int64 | quote }}
+  RUTOMQ_TRANSACTION_REMOVE_EXPIRED_TRANSACTION_CLEANUP_INTERVAL_MS: {{ .Values.agent.transactionalIdExpirationCheckIntervalMs | int64 | quote }}
+  RUTOMQ_TRANSACTION_ABORT_TIMED_OUT_TRANSACTION_CLEANUP_INTERVAL_MS: {{ .Values.agent.transactionAbortTimedOutCleanupIntervalMs | quote }}
+  RUTOMQ_TRANSACTION_PARTITION_VERIFICATION_ENABLE: {{ .Values.agent.transactionPartitionVerificationEnable | quote }}
+  RUTOMQ_TRANSACTION_MAX_TIMEOUT_MS: {{ .Values.agent.transactionMaxTimeoutMs | quote }}
+  RUTOMQ_TRANSACTION_TWO_PHASE_COMMIT_ENABLE: {{ .Values.agent.transactionTwoPhaseCommitEnable | quote }}
+  RUTOMQ_GROUP_MIN_SESSION_TIMEOUT_MS: {{ .Values.agent.classicGroupMinSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_GROUP_MAX_SESSION_TIMEOUT_MS: {{ .Values.agent.classicGroupMaxSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_GROUP_MAX_SIZE: {{ .Values.agent.classicGroupMaxSize | int64 | quote }}
+  RUTOMQ_GROUP_COORDINATOR_BACKGROUND_THREADS: {{ .Values.agent.groupCoordinatorBackgroundThreads | quote }}
+  RUTOMQ_GROUP_COORDINATOR_CACHED_BUFFER_MAX_BYTES: {{ .Values.agent.groupCoordinatorCachedBufferMaxBytes | int64 | quote }}
+  RUTOMQ_SHARE_COORDINATOR_CACHED_BUFFER_MAX_BYTES: {{ .Values.agent.shareCoordinatorCachedBufferMaxBytes | int64 | quote }}
+  RUTOMQ_GROUP_CONSUMER_ASSIGNOR_OFFLOAD_ENABLE: {{ .Values.agent.groupConsumerAssignorOffloadEnable | quote }}
+  RUTOMQ_GROUP_SHARE_ASSIGNOR_OFFLOAD_ENABLE: {{ .Values.agent.groupShareAssignorOffloadEnable | quote }}
+  RUTOMQ_GROUP_STREAMS_ASSIGNOR_OFFLOAD_ENABLE: {{ .Values.agent.groupStreamsAssignorOffloadEnable | quote }}
+  RUTOMQ_GROUP_CONSUMER_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.groupConsumerHeartbeatIntervalMs | quote }}
+  RUTOMQ_GROUP_CONSUMER_MIN_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.groupConsumerMinHeartbeatIntervalMs | int64 | quote }}
+  RUTOMQ_GROUP_CONSUMER_MAX_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.groupConsumerMaxHeartbeatIntervalMs | int64 | quote }}
+  RUTOMQ_GROUP_CONSUMER_SESSION_TIMEOUT_MS: {{ .Values.agent.groupConsumerSessionTimeoutMs | quote }}
+  RUTOMQ_GROUP_CONSUMER_MIN_SESSION_TIMEOUT_MS: {{ .Values.agent.groupConsumerMinSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_GROUP_CONSUMER_MAX_SESSION_TIMEOUT_MS: {{ .Values.agent.groupConsumerMaxSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_GROUP_CONSUMER_MAX_SIZE: {{ .Values.agent.groupConsumerMaxSize | int64 | quote }}
+  RUTOMQ_GROUP_CONSUMER_ASSIGNORS: {{ join "," .Values.agent.groupConsumerAssignors | quote }}
+  RUTOMQ_GROUP_CONSUMER_REGEX_REFRESH_INTERVAL_MS: {{ .Values.agent.groupConsumerRegexRefreshIntervalMs | int64 | quote }}
+  RUTOMQ_GROUP_SHARE_ASSIGNORS: {{ join "," .Values.agent.groupShareAssignors | quote }}
+  RUTOMQ_STREAMS_GROUP_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.streamsGroupHeartbeatIntervalMs | int64 | quote }}
+  RUTOMQ_STREAMS_GROUP_MIN_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.streamsGroupMinHeartbeatIntervalMs | int64 | quote }}
+  RUTOMQ_STREAMS_GROUP_MAX_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.streamsGroupMaxHeartbeatIntervalMs | int64 | quote }}
+  RUTOMQ_STREAMS_GROUP_SESSION_TIMEOUT_MS: {{ .Values.agent.streamsGroupSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_STREAMS_GROUP_MIN_SESSION_TIMEOUT_MS: {{ .Values.agent.streamsGroupMinSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_STREAMS_GROUP_MAX_SESSION_TIMEOUT_MS: {{ .Values.agent.streamsGroupMaxSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_GROUP_STREAMS_MAX_SIZE: {{ .Values.agent.streamsGroupMaxSize | int64 | quote }}
+  RUTOMQ_STREAMS_GROUP_INITIAL_REBALANCE_DELAY_MS: {{ .Values.agent.streamsGroupInitialRebalanceDelayMs | int64 | quote }}
+  RUTOMQ_STREAMS_GROUP_NUM_STANDBY_REPLICAS: {{ .Values.agent.streamsGroupNumStandbyReplicas | int64 | quote }}
+  RUTOMQ_STREAMS_GROUP_MAX_STANDBY_REPLICAS: {{ .Values.agent.streamsGroupMaxStandbyReplicas | int64 | quote }}
+  RUTOMQ_SHARE_GROUP_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.shareGroupHeartbeatIntervalMs | quote }}
+  RUTOMQ_SHARE_GROUP_MIN_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.shareGroupMinHeartbeatIntervalMs | int64 | quote }}
+  RUTOMQ_SHARE_GROUP_MAX_HEARTBEAT_INTERVAL_MS: {{ .Values.agent.shareGroupMaxHeartbeatIntervalMs | int64 | quote }}
+  RUTOMQ_SHARE_GROUP_SESSION_TIMEOUT_MS: {{ .Values.agent.shareGroupSessionTimeoutMs | quote }}
+  RUTOMQ_SHARE_GROUP_MIN_SESSION_TIMEOUT_MS: {{ .Values.agent.shareGroupMinSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_SHARE_GROUP_MAX_SESSION_TIMEOUT_MS: {{ .Values.agent.shareGroupMaxSessionTimeoutMs | int64 | quote }}
+  RUTOMQ_SHARE_GROUP_MAX_SIZE: {{ .Values.agent.shareGroupMaxSize | int64 | quote }}
+  RUTOMQ_SHARE_RECORD_LOCK_DURATION_MS: {{ .Values.agent.shareRecordLockDurationMs | int64 | quote }}
+  RUTOMQ_SHARE_MIN_RECORD_LOCK_DURATION_MS: {{ .Values.agent.shareMinRecordLockDurationMs | int64 | quote }}
+  RUTOMQ_SHARE_MAX_RECORD_LOCK_DURATION_MS: {{ .Values.agent.shareMaxRecordLockDurationMs | int64 | quote }}
+  RUTOMQ_SCRAM_ITERATIONS: {{ .Values.security.scram.iterations | quote }}
+  RUTOMQ_SASL_ENABLED: {{ or .Values.security.scram.enabled (ne .Values.security.scram.existingSecret "") | quote }}
+  RUTOMQ_SASL_MAX_REAUTH_MS: {{ .Values.security.scram.maxReauthMs | int64 | quote }}
+  RUTOMQ_DELEGATION_TOKEN_MAX_LIFETIME_MS: {{ .Values.security.delegationTokens.maxLifetimeMs | int64 | quote }}
+  RUTOMQ_DELEGATION_TOKEN_EXPIRY_MS: {{ .Values.security.delegationTokens.expiryMs | int64 | quote }}
+  RUTOMQ_ACL_ENABLED: {{ .Values.security.authorization.enabled | quote }}
+  RUTOMQ_ALLOW_EVERYONE_IF_NO_ACL_FOUND: {{ .Values.security.authorization.allowEveryoneIfNoAclFound | quote }}
+  RUTOMQ_SUPER_USERS: {{ join ";" .Values.security.authorization.superUsers | quote }}

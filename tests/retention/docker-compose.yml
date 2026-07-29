@@ -1,0 +1,74 @@
+x-agent-environment: &agent-environment
+  DATABASE_URL: postgres://rutomq:rutomq@postgres:5432/rutomq
+  OBJECT_STORE_BACKEND: s3
+  S3_ENDPOINT: http://minio:9000
+  S3_BUCKET: rutomq
+  S3_ROOT: rutomq
+  S3_REGION: us-east-1
+  S3_ACCESS_KEY_ID: minioadmin
+  S3_SECRET_ACCESS_KEY: minioadmin
+  RUTOMQ_FLUSH_INTERVAL_MS: 25
+  RUTOMQ_MAX_BATCH_BYTES: 1048576
+  RUTOMQ_RETENTION_INTERVAL_MS: 100
+  RUTOMQ_OBJECT_DELETE_GRACE_MS: 0
+  RUTOMQ_ORPHAN_GC_INTERVAL_MS: 60000
+  RUST_LOG: rutomq=info
+
+x-agent: &agent
+  image: rutomq:retention-it
+  command: agent
+  depends_on:
+    postgres:
+      condition: service_healthy
+    minio-init:
+      condition: service_completed_successfully
+  environment: *agent-environment
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: rutomq
+      POSTGRES_PASSWORD: rutomq
+      POSTGRES_DB: rutomq
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rutomq -d rutomq"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        until mc alias set local http://minio:9000 minioadmin minioadmin;
+        do sleep 1; done;
+        mc mb --ignore-existing local/rutomq
+
+  agent1:
+    <<: *agent
+    environment:
+      <<: *agent-environment
+      KAFKA_ADVERTISE_HOST: agent1
+      KAFKA_ADVERTISE_PORT: 9092
+    ports:
+      - "${RUTOMQ_RETENTION_ADMIN1_PORT:-38281}:8080"
+
+  agent2:
+    <<: *agent
+    environment:
+      <<: *agent-environment
+      KAFKA_ADVERTISE_HOST: agent2
+      KAFKA_ADVERTISE_PORT: 9092
+    ports:
+      - "${RUTOMQ_RETENTION_ADMIN2_PORT:-38282}:8080"
